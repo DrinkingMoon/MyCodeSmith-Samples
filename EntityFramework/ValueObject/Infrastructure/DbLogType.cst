@@ -1,0 +1,48 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_ValueObject
+*********************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace <%= this.NameSapce %>.ValueObject
+{
+    public enum DbLogType
+    {
+        [Description("其他")]
+        Other = 0,
+        [Description("登录")]
+        Login = 1,
+        [Description("退出")]
+        Exit = 2,
+        [Description("访问")]
+        Visit = 3,
+        [Description("新增")]
+        Create = 4,
+        [Description("删除")]
+        Delete = 5,
+        [Description("修改")]
+        Update = 6,
+        [Description("提交")]
+        Submit = 7,
+        [Description("异常")]
+        Exception = 8,
+    }
+}
+
+

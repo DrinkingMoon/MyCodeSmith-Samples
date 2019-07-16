@@ -1,0 +1,46 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库名" Description="数据库名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+using System.Data.Linq;
+using System.Data.Linq.Mapping;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    /// <summary>
+    /// 数据库参数类
+    /// </summary>
+    public static class DbContext
+    {
+        /// <summary>
+        /// 获取仓库管理数据库操作上下文
+        /// </summary>
+        public static <%= this.DataBaseName %>Context <%= this.DataBaseName %>DataContext
+        {
+            get
+            {
+                <%= this.DataBaseName %>Context dataContext =
+                    new <%= this.DataBaseName %>Context(GlobalObject.GlobalParameter.StorehouseConnectionString);
+
+                dataContext.DeferredLoadingEnabled = false;
+                return dataContext;
+            }
+        }
+    }
+}

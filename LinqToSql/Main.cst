@@ -1,0 +1,97 @@
+﻿<%-- 
+Name: MVC_Repository模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." 
+Debug="True" ResponseEncoding="UTF-8"%>
+
+<%-- 注册模板 --%>
+<%@ Register Name="DomainEvent" Template=".\DomainEvent\DEMain.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="Entity" Template=".\Entity\EnMain.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="Repository" Template=".\Repository\ReMain.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="ValueObject" Template=".\ValueObject\VOMain.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%-- 参数 --%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库" Description="数据库名"%>
+<%@ Property Name="TDB" Type="SchemaExplorer.TableSchemaCollection" Default="" Optional="False" Category="数据库" Description="选择表"%> 
+<%@ Property Name="NameSapce" Type="System.String" Default="" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="Prefix" Type="System.String" Optional="True" Category="前缀名" Description="前缀名"%>
+
+
+<%
+    this.ExceDomainEvent();
+    this.ExceEntity();
+    this.ExceRepository();
+    this.ExceValueObject();
+%>
+
+<script runat="template">
+void ExceDomainEvent()
+{
+	DomainEvent De =new DomainEvent();
+    De.OutPut = OutputDirectory;
+	De.TDB = TDB;
+    De.NameSapce = this.NameSapce;
+    De.DataBaseName = this.DataBaseName;
+    De.Prefix = this.Prefix;
+    De.Render(this.Response);
+}
+
+
+void ExceEntity()
+{
+	Entity En =new Entity();
+    En.OutPut = OutputDirectory;
+    En.DataBaseName = this.DataBaseName;
+    En.NameSapce = this.NameSapce;
+    En.Render(this.Response);
+}
+
+
+void ExceRepository()
+{
+	Repository Re =new Repository();
+    Re.OutPut = OutputDirectory;
+	Re.TDB = TDB;
+    Re.DataBaseName = this.DataBaseName;
+    Re.NameSapce = this.NameSapce;
+    Re.Prefix = this.Prefix;
+    Re.Render(this.Response);
+}
+
+
+void ExceValueObject()
+{
+	ValueObject VO =new ValueObject();
+    VO.OutPut = OutputDirectory;
+	VO.TDB = TDB;
+    VO.NameSapce = this.NameSapce;
+    VO.Prefix = this.Prefix;
+    VO.Render(this.Response);
+}
+</script>
+
+
+<script runat="template">
+//解决方案输出路径
+private string Directory = String.Empty;
+
+[Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(System.Drawing.Design.UITypeEditor))] 
+[Optional, NotChecked]
+[DefaultValue("")]
+
+public string OutputDirectory 
+{ 
+	get
+	{
+		return Directory;
+	}
+	set
+	{
+		if (value.EndsWith("\\")) value = value.Substring(0, value.Length -1);
+		Directory = value;
+	} 
+}
+</script>

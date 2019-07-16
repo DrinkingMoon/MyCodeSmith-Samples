@@ -1,0 +1,152 @@
+﻿<%-- 
+
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+
+<%-- 注册实体层Entity模板 --%>
+<%@ Register Name="EntitySamples" Template=".\DataEntity\DataEntity.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="BEMSamples" Template=".\DataLayer\BEMDataLayer.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="EntitySamplesView" Template=".\DataEntity\DataEntityView.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="BEMSamplesView" Template=".\DataLayer\BEMDataLayerView.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="StoredProcedures" Template=".\DataBaseProcedures\StoredProcedures_DataBase.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%-- 参数 --%>
+<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Optional="False" Category="公共参数" Description="数据库"%>
+<%@ Property Name="ProcedurePrefix" Type="System.String" Default="" Optional="True" Category="公共参数" Description="存储过程前缀名"%>
+<%@ Property Name="Expressname" Type="System.String" Default="" Optional="False" Category="项目组件名称" Description="项目名称"%>
+<%@ Property Name="DataLayerName" Type="System.String" Default="DataLayer" Optional="False" Category="项目组件名称" Description="BEM名称"%>
+<%@ Property Name="DataEntityName" Type="System.String" Default="DataEntity" Optional="False" Category="项目组件名称" Description="实体集名称"%>
+<%@ Property Name="DBUtilityName" Type="System.String" Default="DBUtility" Optional="False" Category="项目组件名称" Description="数据层组件名称"%>
+<%
+//创建
+
+this.OutputDataLayer();
+
+foreach(TableSchema table in this.SourceDatabase.Tables)
+{
+    this.OutputBEM(table);
+    this.OutputEntity(table);
+}
+
+foreach(ViewSchema view in this.SourceDatabase.Views)
+{
+    this.OutputBEMView(view);
+    this.OutputEntityView(view);
+}
+
+Debug.WriteLine("OK");
+%>
+
+
+<script runat="template">
+private void OutputBEMView(ViewSchema SourceView)
+{
+	BEMSamplesView bem =new BEMSamplesView();
+    
+	string FileDirectory = OutputDirectory +"\\DataLayer\\View\\"+ SourceView.Name +".cs";
+	bem.TargetView = SourceView;
+    bem.Expressname = this.Expressname;
+    bem.DataEntityName = this.DataEntityName;
+    bem.DataLayerName = this.DataLayerName;
+    bem.DBUtilityName = this.DBUtilityName;
+	bem.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+private void OutputBEM(TableSchema SourceTable)
+{
+	BEMSamples bem =new BEMSamples();
+    
+	string FileDirectory = OutputDirectory +"\\DataLayer\\Table\\"+ SourceTable.Name +".cs";
+	bem.TargetTable = SourceTable;
+    bem.ProcedurePrefix = this.ProcedurePrefix;
+    bem.Expressname = this.Expressname;
+    bem.DataEntityName = this.DataEntityName;
+    bem.DataLayerName = this.DataLayerName;
+    bem.DBUtilityName = this.DBUtilityName;
+	bem.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+private void OutputEntityView(ViewSchema SourceView)
+{
+    EntitySamplesView ent =new EntitySamplesView();
+    
+    string FileDirectory = OutputDirectory +"\\DataEntity\\View\\"+ SourceView.Name +".cs";
+	ent.TargetView = SourceView;
+    ent.DataEntityName = this.DataEntityName;
+	ent.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+private void OutputEntity(TableSchema SourceTable)
+{
+    EntitySamples ent =new EntitySamples();
+    
+    string FileDirectory = OutputDirectory +"\\DataEntity\\Table\\"+ SourceTable.Name +".cs";
+	ent.TargetTable = SourceTable;
+    ent.DataEntityName = this.DataEntityName;
+	ent.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+//private void OutputProcedures(TableSchema SourceTable)
+//{
+//    
+//    StoredProcedures pro = new StoredProcedures();
+//    string FileDirectory = OutputDirectory +"\\DataBaseProcedures\\"+ SourceTable.Name +".sql";
+//	pro.TargetTable = SourceTable;
+//    pro.ProcedurePrefix = this.ProcedurePrefix;
+//	pro.RenderToFile(FileDirectory,true);
+//	Debug.WriteLine(FileDirectory +" 创建成功.");
+//    
+//}
+
+private void OutputDataLayer()
+{
+//	DataLayer dal =new DataLayer();
+//    dal.DataEntityName = this.DataEntityName;
+//    dal.DataLayerName = this.DataLayerName;
+//    dal.Expressname = this.Expressname;
+//    dal.DBUtilityName = this.DBUtilityName;
+//	dal.RenderToFile(OutputDirectory +"\\DataLayer\\DataLayer.cs",true);
+//	
+//	IDataLayer idal =new IDataLayer();
+//    idal.DataLayerName = this.DataLayerName;
+//	idal.RenderToFile(OutputDirectory +"\\DataLayer\\IDataLayer.cs",true);
+//    
+//    AccessParameter apt =new AccessParameter();
+//    apt.DataLayerName = this.DataLayerName;	
+//    apt.RenderToFile(OutputDirectory +"\\DataEntity\\AccessParameter.cs",true);
+    StoredProcedures sp = new StoredProcedures();
+    sp.SourceDatabase = this.SourceDatabase;
+    sp.TDB = this.SourceDatabase.Tables;
+    sp.ProcedurePrefix = this.ProcedurePrefix;
+    sp.RenderToFile(OutputDirectory +"\\DataBaseProcedures\\"+ SourceDatabase.Name +".sql",true);
+	
+}
+
+</script>
+
+
+<script runat="template">
+//解决方案输出路径
+private string Directory = String.Empty;
+
+[Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(System.Drawing.Design.UITypeEditor))] 
+[Optional, NotChecked]
+[DefaultValue("")]
+public string OutputDirectory 
+{ 
+	get
+	{
+		return Directory;
+	}
+	set
+	{
+		if (value.EndsWith("\\")) value = value.Substring(0, value.Length -1);
+		Directory = value;
+	} 
+}
+</script>

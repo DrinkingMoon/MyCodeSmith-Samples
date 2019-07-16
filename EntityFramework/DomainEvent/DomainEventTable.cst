@@ -1,0 +1,107 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="Prefix" Type="System.String" Optional="True" Category="前缀名" Description="前缀名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_DomainEvent
+*********************************************************************************/
+using <%= this.NameSapce %>.Entity.Models;
+using <%= this.NameSapce %>.Repository.<%=this.Prefix%>;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace <%= this.NameSapce %>.DomainEvent.<%=this.Prefix%>
+{
+    /// <summary>
+	/// <%= TargetTable.Description %>
+	/// </summary>
+    public class <%=this.TargetTable.Name%>Eve
+    {
+        private I<%=this.TargetTable.Name%>Rep service = new <%=this.TargetTable.Name%>Rep();
+
+        public List<<%=this.TargetTable.Name%>> GetList()
+        {
+            return service.IQueryable().ToList();
+        }
+        
+        public <%=this.TargetTable.Name%> GetForm(string keyValue)
+        {
+            return service.FindEntity(keyValue);
+        }
+        
+        public void DeleteForm(string keyValue)
+        {
+            service.Delete(t => t.F_Id == keyValue);
+        }
+        
+        public void SubmitForm(<%=this.TargetTable.Name%> <% if( this.TargetTable.Name.Contains("_")) 
+        {
+            %><%=this.TargetTable.Name.Substring(this.TargetTable.Name.IndexOf("_") + 1, this.TargetTable.Name.Length - this.TargetTable.Name.IndexOf("_") - 1).ToLower()%><%
+        }
+        else
+        {
+            %><%=this.TargetTable.Name.ToLower()%><%
+        }%>Entity, string keyValue)
+        {
+            if (!string.IsNullOrEmpty(keyValue))
+            {
+                <% if( this.TargetTable.Name.Contains("_")) 
+                {
+                    %><%=this.TargetTable.Name.Substring(this.TargetTable.Name.IndexOf("_") + 1, this.TargetTable.Name.Length - this.TargetTable.Name.IndexOf("_") - 1).ToLower()%><%
+                }
+                else
+                {
+                    %><%=this.TargetTable.Name.ToLower()%><%
+                }%>Entity.Modify(keyValue);
+                service.Update(<% if( this.TargetTable.Name.Contains("_")) 
+                                {
+                                    %><%=this.TargetTable.Name.Substring(this.TargetTable.Name.IndexOf("_") + 1, this.TargetTable.Name.Length - this.TargetTable.Name.IndexOf("_") - 1).ToLower()%><%
+                                }
+                                else
+                                {
+                                    %><%=this.TargetTable.Name.ToLower()%><%
+                                }%>Entity);
+            }
+            else
+            {
+                <% if( this.TargetTable.Name.Contains("_")) 
+                {
+                    %><%=this.TargetTable.Name.Substring(this.TargetTable.Name.IndexOf("_") + 1, this.TargetTable.Name.Length - this.TargetTable.Name.IndexOf("_") - 1).ToLower()%><%
+                }
+                else
+                {
+                    %><%=this.TargetTable.Name.ToLower()%><%
+                }%>Entity.Create();
+                service.Insert(<% if( this.TargetTable.Name.Contains("_")) 
+                {
+                    %><%=this.TargetTable.Name.Substring(this.TargetTable.Name.IndexOf("_") + 1, this.TargetTable.Name.Length - this.TargetTable.Name.IndexOf("_") - 1).ToLower()%><%
+                }
+                else
+                {
+                    %><%=this.TargetTable.Name.ToLower()%><%
+                }%>Entity);
+            }
+        }
+    }
+}
+
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

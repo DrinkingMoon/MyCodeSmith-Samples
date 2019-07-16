@@ -1,0 +1,233 @@
+﻿
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库" Description="数据库名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Repository
+*********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.Remoting;
+using System.Diagnostics;
+using System.Data;
+using GlobalObject;
+using <%= this.NameSapce %>.Entity;
+
+namespace <%= this.NameSapce %>.Repository
+{
+    public class RepositoryBase
+    {
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
+        public RepositoryBase()
+        {
+
+        }
+        
+        /// <summary>
+        /// 获取服务组件
+        /// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <returns>返回组件接口</returns>
+        static IRepositoryBase GetObject<T>()
+        {
+            string name = typeof(T).ToString();
+
+            int indexOfLastPoint = name.LastIndexOf('.');
+
+            string className;
+
+            if (indexOfLastPoint == -1)
+            {
+                className = name.Substring(1);
+            }
+            else
+            {
+                if (name.Length > indexOfLastPoint + 6 && name.Substring(indexOfLastPoint + 1, 5) == "View_")
+                {
+                    name = name.Substring(0, indexOfLastPoint + 1) + name.Substring(indexOfLastPoint + 6, 
+                        name.Length - indexOfLastPoint - 6);
+                }
+
+                className = name.Replace("Entity.", "Repository.") + "Rep";
+            }
+
+            ObjectHandle objectHandle = Activator.CreateInstance(null, className);
+
+            return (IRepositoryBase)objectHandle.Unwrap();
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回object对象</returns>
+        public object GetList<T>(<%=this.DataBaseName%>Context ctx)
+        {
+            try
+            {
+                if (typeof(T).Name.Length > 5 && typeof(T).Name.Substring(0, 5) == "View_")
+                {
+                    return GetObject<T>().GetList_View(ctx);
+                }
+                else
+                {
+                    return GetObject<T>().GetList(ctx);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 获取实体对象
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">对象唯一编码(主键)</param>
+        /// <returns>返回object对象</returns>
+        public object GetItem<T>(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null || keyValue.Trim().Length == 0)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+
+                if (typeof(T).Name.Length > 5 && typeof(T).Name.Substring(0, 5) == "View_")
+                {
+                    return GetObject<T>().GetItem_View(ctx, keyValue);
+                }
+                else
+                {
+                    return GetObject<T>().GetItem(ctx, keyValue);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 删除信息
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="keyValue">对象唯一编码(主键)</param>
+        public void Delete<T>(string keyValue)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                Delete<T>(ctx, keyValue);
+                ctx.SubmitChanges();
+            }
+        }
+
+        /// <summary>
+        /// 删除信息
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">对象唯一编码(主键)</param>
+        public void Delete<T>(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null || keyValue.Trim().Length == 0)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+
+                GetObject<T>().Delete(ctx, keyValue);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 添加信息
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="model">实体对象</param>
+        public void Insert<T>(T model)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                Insert<T>(ctx, model);
+                ctx.SubmitChanges();
+            }
+        }
+
+        /// <summary>
+        /// 添加信息
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model">实体对象</param>
+        public void Insert<T>(<%=this.DataBaseName%>Context ctx, T model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+
+                GetObject<T>().Insert(ctx, model);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 修改信息
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="model">实体对象</param>
+        public void Modify<T>(T model)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                Modify<T>(ctx, model);
+                ctx.SubmitChanges();
+            }
+        }
+
+        /// <summary>
+        /// 修改信息
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model">实体对象</param>
+        public void Modify<T>(<%=this.DataBaseName%>Context ctx, T model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+
+                GetObject<T>().Modify(ctx, model);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+}

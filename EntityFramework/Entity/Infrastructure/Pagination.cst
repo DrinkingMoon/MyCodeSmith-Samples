@@ -1,0 +1,70 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    /// <summary>
+    /// 分页信息
+    /// </summary>
+    public class Pagination
+    {
+        /// <summary>
+        /// 每页行数
+        /// </summary>
+        public int rows { get; set; }
+        /// <summary>
+        /// 当前页
+        /// </summary>
+        public int page { get; set; }
+        /// <summary>
+        /// 排序列
+        /// </summary>
+        public string sidx { get; set; }
+        /// <summary>
+        /// 排序类型
+        /// </summary>
+        public string sord { get; set; }
+        /// <summary>
+        /// 总记录数
+        /// </summary>
+        public int records { get; set; }
+        /// <summary>
+        /// 总页数
+        /// </summary>
+        public int total
+        {
+            get
+            {
+                if (records > 0)
+                {
+                    return records % this.rows == 0 ? records / this.rows : records / this.rows + 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+    }
+}
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

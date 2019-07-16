@@ -1,0 +1,282 @@
+﻿
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库" Description="数据库名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Repository
+*********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
+using System.Data.Common;
+using System.Collections;
+using System.Data.Linq;
+using System.Data.Linq.Mapping;
+using System.Diagnostics;
+using <%=this.NameSapce%>.Entity;
+
+namespace <%=this.NameSapce%>.Repository
+{
+    /// <summary>
+	/// <%=this.TargetTable.Name%>实体的Repository <%= TargetTable.Description %>
+	/// </summary>
+    class <%=this.TargetTable.Name%>Rep : IRepositoryBase, I<%=this.TargetTable.Name%>Rep
+    {
+        #region 公用方法
+
+        /// <summary>
+        /// 获得<%=this.TargetTable.Name%>视图实体对象
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        /// <returns>返回object对象</returns>
+        public object GetItem_View(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null)
+                {
+                    return null;
+                }
+
+                var varData = from a in ctx.View_<%=this.TargetTable.Name%>
+                              where a.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString() == keyValue
+                              select a;
+
+                if (varData.Count() == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    return varData.First();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 获得<%=this.TargetTable.Name%>视图实体集
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回object对象</returns>
+        public object GetList_View(<%=this.DataBaseName%>Context ctx)
+        {
+            try
+            {
+                var varData = from a in ctx.View_<%=this.TargetTable.Name%>
+                              select a;
+
+                if (varData == null)
+                {
+                    return null;
+                }
+
+                return varData.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        
+        /// <summary>
+        /// 获得<%=this.TargetTable.Name%>实体对象
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        /// <returns>返回object对象</returns>
+        public object GetItem(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null)
+                {
+                    return null;
+                }
+
+                var varData = from a in ctx.<%=this.TargetTable.Name%>
+                              where a.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString() == keyValue
+                              select a;
+
+                if (varData.Count() == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    return varData.First();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        /// <summary>
+        /// 获得<%=this.TargetTable.Name%>实体集
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回object对象</returns>
+        public object GetList(<%=this.DataBaseName%>Context ctx)
+        {
+            try
+            {
+                var varData = from a in ctx.<%=this.TargetTable.Name%>
+                              select a;
+
+                if (varData == null)
+                {
+                    return null;
+                }
+
+                return varData.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+        
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        public void Delete(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null)
+                {
+                    throw new Exception("数据为空，无法操作");
+                }
+                var varData = from a in ctx.<%=this.TargetTable.Name%>
+                              where a.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString() == keyValue
+                              select a;
+
+                //foreach (<%=this.TargetTable.Name%> item in varData)
+                //{
+                //    item.F_DeleteTime = ServerTime.Time;
+                //    item.F_DeleteMark = true;
+                //}
+                
+                ctx.<%=this.TargetTable.Name%>.DeleteAllOnSubmit(varData);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 修改<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model"><%=this.TargetTable.Name%>实体对象</param>
+        public void Modify(<%=this.DataBaseName%>Context ctx, object model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    throw new Exception("数据为空，无法操作");
+                }
+
+                <%=this.TargetTable.Name%> info = new <%=this.TargetTable.Name%>();
+
+                info = model as <%=this.TargetTable.Name%>;
+
+                var varData = from a in ctx.<%=this.TargetTable.Name%>
+                              where a.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString() == info.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString()
+                              select a;
+
+                if (varData.Count() == 1)
+                {
+                
+                <%foreach(ColumnSchema col in TargetTable.Columns){ if (col.Name.Substring(0,2) == "F_") { continue;}%>
+                    varData.Single().<%= col.Name %> = info.<%= col.Name %>;
+                <% } %>
+                
+                    varData.Single().F_LastModifyTime = ServerTime.Time;
+                }
+                else if(varData.Count() == 0)
+                {
+                    throw new Exception("数据不存在");
+                }
+                else
+                {
+                    throw new Exception("数据不唯一");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 添加<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model"><%=this.TargetTable.Name%>实体对象</param>
+        public void Insert(<%=this.DataBaseName%>Context ctx, object model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    throw new Exception("数据为空，无法操作");
+                }
+
+                <%=this.TargetTable.Name%> info = new <%=this.TargetTable.Name%>();
+
+                info = model as <%=this.TargetTable.Name%>;
+
+                var varData = from a in ctx.<%=this.TargetTable.Name%>
+                              where a.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString() == info.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString()
+                              select a;
+
+                if (varData.Count() > 0)
+                {
+                    throw new Exception("数据已存在");
+                }
+                else
+                {
+                    info.F_CreatorTime = ServerTime.Time;
+                    ctx.<%=this.TargetTable.Name%>.InsertOnSubmit(info);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        #endregion
+    }
+}
+
+
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

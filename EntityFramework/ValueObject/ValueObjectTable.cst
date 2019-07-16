@@ -1,0 +1,52 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="Prefix" Type="System.String" Optional="True" Category="前缀名" Description="前缀名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_ValueObject
+*********************************************************************************/
+
+using <%= this.NameSapce %>.Entity.Models;
+
+namespace <%= this.NameSapce %>.ValueObject.<%=this.Prefix%>
+{
+    /// <summary>
+	/// <%= TargetTable.Description %>
+	/// </summary>
+    public class <%=this.TargetTable.Name%>Obj 
+    {
+        public <%=this.TargetTable.Name%> Assignment(<%=this.TargetTable.Name%> value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%> == null || value.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.Trim().Length == 0)
+            {
+                return null;
+            }
+
+            <%=this.TargetTable.Name%> result = new <%=this.TargetTable.Name%>();
+        
+        <%foreach(ColumnSchema col in TargetTable.Columns){ %>
+            result.<%= col.Name %> = value.<%= col.Name %>;
+        <% } %>
+        
+            return result;
+        }
+    }
+}
+

@@ -1,0 +1,104 @@
+﻿
+<%-- 
+Name: MVC_Repository模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." 
+Debug="True" ResponseEncoding="UTF-8"%>
+
+<%-- 注册模板 --%>
+<%@ Register Name="TableRep" Template=".\TableRep.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="TableIRep" Template=".\TableIRep.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="RepositoryBase" Template=".\RepositoryBase.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IRepositoryBase" Template=".\IRepositoryBase.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="RepositroyFactory" Template=".\RepositroyFactory.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IRCommRepository" Template=".\IRCommRepository.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%-- 参数 --%>
+<%@ Property Name="TDB" Type="SchemaExplorer.TableSchemaCollection" Default="" Optional="False" Category="数据库" Description="选择表"%> 
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库" Description="数据库名"%>
+<%@ Property Name="NameSapce" Type="System.String" Default="" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="Prefix" Type="System.String" Optional="True" Category="前缀名" Description="前缀名"%>
+<%@ Property Name="OutPut" Type="System.String" Optional="False" Category="输出路径" Description="外部传入的输出路径参数"%>
+
+<%
+
+    foreach(TableSchema table in this.TDB)
+    {
+        this.OutputClass_Table(table);
+        this.OutputInterface_Table(table);
+    }
+    
+    RepositoryBase cs0 = new RepositoryBase();
+    cs0.NameSapce = this.NameSapce;
+    cs0.DataBaseName = this.DataBaseName;
+    cs0.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Repository\\RepositoryBase.cs",true);
+    
+    IRepositoryBase cs1 = new IRepositoryBase();
+    cs1.NameSapce = this.NameSapce;
+    cs1.DataBaseName = this.DataBaseName;
+    cs1.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Repository\\IRepositoryBase.cs",true);
+    
+    RepositroyFactory cs3 = new RepositroyFactory();
+    cs3.NameSapce = this.NameSapce;
+    cs3.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Repository\\RepositroyFactory.cs",true);
+    
+    IRCommRepository cs4 = new IRCommRepository();
+    cs4.NameSapce = this.NameSapce;
+    cs4.DataBaseName = this.DataBaseName;
+    cs4.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Repository\\IRCommRepository.cs",true);
+    
+%>
+
+
+<script runat="template">
+// My methods here.
+private void OutputClass_Table(TableSchema SourceTable)
+{
+	TableRep bem =new TableRep();
+    
+	string FileDirectory = OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Repository\\Repository\\"+ Prefix +"\\"+ SourceTable.Name +"Rep.cs";
+	bem.TargetTable = SourceTable;
+    bem.NameSapce = this.NameSapce;
+    bem.DataBaseName = this.DataBaseName;
+	bem.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+private void OutputInterface_Table(TableSchema SourceTable)
+{
+	TableIRep bem =new TableIRep();
+    
+	string FileDirectory = OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Repository\\IRepository\\"+ Prefix +"\\I"+ SourceTable.Name +"Rep.cs";
+	bem.TargetTable = SourceTable;
+    bem.NameSapce = this.NameSapce;
+	bem.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+</script>
+
+
+<script runat="template">
+//解决方案输出路径
+private string Directory = String.Empty;
+
+[Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(System.Drawing.Design.UITypeEditor))] 
+[Optional, NotChecked]
+[DefaultValue("")]
+
+public string OutputDirectory 
+{ 
+	get
+	{
+		return Directory;
+	}
+	set
+	{
+		if (value.EndsWith("\\")) value = value.Substring(0, value.Length -1);
+		Directory = value;
+	} 
+}
+</script>

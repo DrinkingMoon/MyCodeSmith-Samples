@@ -1,0 +1,304 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库" Description="数据库名"%>
+<%@ Property Name="Prefix" Type="System.String" Optional="True" Category="前缀名" Description="前缀名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_DomainEvent
+*********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
+using System.Data.Common;
+using System.Collections;
+using System.Data.Linq;
+using System.Data.Linq.Mapping;
+using <%= this.NameSapce %>.Entity;
+using <%= this.NameSapce %>.Repository;
+using <%= this.NameSapce %>.ValueObject<%if(this.Prefix != null && this.Prefix.Trim().Length > 0) { %>.<%=this.Prefix%><%}%>;
+
+namespace <%= this.NameSapce %>.DomainEvent<%if(this.Prefix != null && this.Prefix.Trim().Length > 0) { %>.<%=this.Prefix%><%}%>
+{
+    /// <summary>
+	///  <%=this.TargetTable.Name%>实体的DomainEvent<%= TargetTable.Description %>
+	/// </summary>
+    public class <%=this.TargetTable.Name%>Eve
+    {
+        RepositoryBase _Rep = new RepositoryBase();
+        <%=this.TargetTable.Name%>Obj _Obj = new <%=this.TargetTable.Name%>Obj();
+        
+        /// <summary>
+        /// 获取所有<%=this.TargetTable.Name%>实体集
+        /// </summary>
+        /// <returns>返回<%=this.TargetTable.Name%>实体列表</returns>
+        public List<<%=this.TargetTable.Name%>> GetAllList()
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetAllList(ctx);
+            }
+        }
+
+        /// <summary>
+        /// 获取所有<%=this.TargetTable.Name%>实体集
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回<%=this.TargetTable.Name%>实体列表</returns>
+        public List<<%=this.TargetTable.Name%>> GetAllList(<%=this.DataBaseName%>Context ctx)
+        {
+            return (from a in ctx.<%=this.TargetTable.Name%> select a).ToList();
+        }
+        
+        /// <summary>
+        /// 获取<%=this.TargetTable.Name%>实体集(删除信息除外)
+        /// </summary>
+        /// <returns>返回<%=this.TargetTable.Name%>实体列表</returns>
+        public List<<%=this.TargetTable.Name%>> GetList()
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetList(ctx);
+            }
+        }
+
+        /// <summary>
+        /// 获取<%=this.TargetTable.Name%>实体集(删除信息除外)
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回<%=this.TargetTable.Name%>实体列表</returns>
+        public List<<%=this.TargetTable.Name%>> GetList(<%=this.DataBaseName%>Context ctx)
+        {
+            return (from a in ctx.<%=this.TargetTable.Name%> where a.F_DeleteMark == null select a).ToList();
+        }
+
+        /// <summary>
+        /// 获得<%=this.TargetTable.Name%>实体对象
+        /// </summary>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        /// <returns>返回<%=this.TargetTable.Name%>实体对象</returns>
+        public <%=this.TargetTable.Name%> GetItem(string keyValue)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetItem(ctx, keyValue);
+            }
+        }
+
+        /// <summary>
+        /// 获得<%=this.TargetTable.Name%>实体对象
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        /// <returns>返回<%=this.TargetTable.Name%>实体对象</returns>
+        public <%=this.TargetTable.Name%> GetItem(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            if (keyValue == null)
+            {
+                throw new Exception("数据为空，无法操作");
+            }
+            
+            var varData = from a in ctx.<%=this.TargetTable.Name%>
+                          where a.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.ToString() == keyValue
+                          select a;
+
+            if (varData.Count() != 1)
+            {
+                return null;
+            }
+            else
+            {
+                return varData.Single();
+            }
+        }
+
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="lstKey"><%=this.TargetTable.Name%>唯一编码列表(主键)</param>
+        public void DeleteList(List<string> lstKey)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                DeleteList(ctx, lstKey);
+                ctx.SubmitChanges();
+            }
+        }
+
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="lstKey"><%=this.TargetTable.Name%>唯一编码列表(主键)</param>
+        public void DeleteList(<%=this.DataBaseName%>Context ctx, List<string> lstKey)
+        {
+            if (lstKey == null)
+            {
+                throw new Exception("数据为空，无法操作");
+            }
+            
+            foreach (string keyValue in lstKey)
+            {
+                DeleteItem(ctx, keyValue);
+            }
+        }
+
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="lstInfo"><%=this.TargetTable.Name%>实体列表</param>
+        public void DeleteList(List<<%=this.TargetTable.Name%>> lstInfo)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                DeleteList(ctx, lstInfo);
+                ctx.SubmitChanges();
+            }
+        }
+
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="lstInfo"><%=this.TargetTable.Name%>实体列表</param>
+        public void DeleteList(<%=this.DataBaseName%>Context ctx, List<<%=this.TargetTable.Name%>> lstInfo)
+        {
+            if (lstInfo == null)
+            {
+                throw new Exception("数据为空，无法操作");
+            }
+            
+            foreach (<%=this.TargetTable.Name%> item in lstInfo)
+            {
+                DeleteItem(ctx, item.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>);
+            }
+        }
+
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        public void DeleteItem(string keyValue)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                DeleteItem(ctx, keyValue);
+                ctx.SubmitChanges();
+            }
+        }
+
+        /// <summary>
+        /// 删除<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue"><%=this.TargetTable.Name%>唯一编码(主键)</param>
+        public void DeleteItem(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            _Rep.Delete<<%=this.TargetTable.Name%>>(ctx, keyValue);
+        }
+
+        /// <summary>
+        /// 提交并保存<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="lstInfo">实体列表</param>
+        public void SubmitList(List<<%=this.TargetTable.Name%>> lstInfo)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                try
+                {
+                    SubmitList(ctx, lstInfo);
+                    ctx.SubmitChanges();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 提交并保存<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="lstInfo"><%=this.TargetTable.Name%>实体列表</param>
+        public void SubmitList(<%=this.DataBaseName%>Context ctx, List<<%=this.TargetTable.Name%>> lstInfo)
+        {
+            if (lstInfo == null)
+            {
+                throw new Exception("数据为空，无法操作");
+            }
+            
+            foreach (<%=this.TargetTable.Name%> bomEntity in lstInfo)
+            {
+                SubmitItem(ctx, bomEntity);
+            }
+        }
+
+        /// <summary>
+        /// 提交并保存<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="bomEntity"><%=this.TargetTable.Name%>实体对象</param>
+        public void SubmitItem(<%=this.TargetTable.Name%> bomEntity)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                try
+                {
+                    SubmitItem(ctx, bomEntity);
+                    ctx.SubmitChanges();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 提交并保存<%=this.TargetTable.Name%>信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="bomEntity"><%=this.TargetTable.Name%>实体对象</param>
+        public void SubmitItem(<%=this.DataBaseName%>Context ctx, <%=this.TargetTable.Name%> bomEntity)
+        {
+            <%=this.TargetTable.Name%> entityInfo = _Obj.Assignment(bomEntity);
+            
+            if (entityInfo == null || entityInfo.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%> == null || entityInfo.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>.Trim().Length == 0)
+            {
+                throw new Exception("数据为空，无法操作");
+            }
+
+            if (IRCommEntity.IsExist<<%=this.TargetTable.Name%>>(ctx, entityInfo.<%=TargetTable.PrimaryKey.MemberColumns[0].ToString().Split('.')[2]%>))
+            {
+                _Rep.Modify<<%=this.TargetTable.Name%>>(ctx, entityInfo);
+            }
+            else
+            {
+                _Rep.Insert<<%=this.TargetTable.Name%>>(ctx, entityInfo);
+            }
+        }
+    }
+}
+
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

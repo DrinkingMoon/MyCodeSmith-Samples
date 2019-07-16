@@ -1,0 +1,47 @@
+﻿<%-- 
+
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetView" Type="SchemaExplorer.ViewSchema" DeepLoad="True" Optional="False" Category="数据视图" Description="数据视图"%>
+<%@ Property Name="DataEntityName" Type="System.String" Optional="False" Category="实体集名称" Description="实体集名称"%>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace <%=this.DataEntityName%>
+{
+    /// <summary>
+	/// <%= TargetView.Description %>
+	/// </summary>
+    [Serializable]
+    public partial class <%= TargetView.Name %>
+    {
+        public <%= TargetView.Name %>()
+        {}
+        
+        <%foreach(SchemaExplorer.ViewColumnSchema col in TargetView.Columns){ %>
+        /// <summary>
+		/// <%= col.Description %>
+		/// </summary>
+        private <%= col.SystemType %><%if(col.SystemType.IsValueType){%>?<%}%> m_<%= col.Name %>;
+        
+        <% } %>
+        
+        <%foreach(SchemaExplorer.ViewColumnSchema col in TargetView.Columns){ %>
+        /// <summary>
+		/// 设置或获取<%= col.Description %>
+		/// </summary>
+        public <%= col.SystemType %><%if(col.SystemType.IsValueType){%>?<%}%> <%= col.Name %> 
+        {
+            set{ m_<%= col.Name %> = value; }
+            get{ return m_<%= col.Name %>; }
+        }
+        
+        <% } %>
+    }
+}

@@ -1,0 +1,366 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库名" Description="数据库名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.Remoting;
+using System.Diagnostics;
+using System.Data;
+using GlobalObject;
+using <%= this.NameSapce %>.Entity;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    /// <summary>
+    /// 实体通用获取类
+    /// </summary>
+    public static class IRCommEntity
+    {
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <returns>返回Table</returns>
+        public static DataTable GetTable<T>()
+        {
+            return GetTable<T>(null);
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="model">相应实体类型的对象</param>
+        /// <returns>返回Table</returns>
+        public static DataTable GetTable<T>(T model)
+        {
+            if (model == null)
+            {
+                return null;
+            }
+
+            string execSql = "select * from " + typeof(T).Name + " WITH(NOLOCK) where 1 = 1 ";
+            List<string> lstProperty = GeneralFunction.GetItemPropertyName(model);
+
+            foreach (string property in lstProperty)
+            {
+                object value = GeneralFunction.GetItemValue<T>(model, property);
+
+                if (value != null)
+                {
+                    execSql += "and " + property + " = '" + value.ToString().Trim() + "' ";
+                }
+            }
+
+            return GlobalObject.DatabaseServer.QueryInfo(execSql);
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="strSql">SQL语句</param>
+        /// <returns>返回Table</returns>
+        public static DataTable GetTable<T>(string strSql)
+        {
+            try
+            {
+                string execSql = @"select * from " + typeof(T).Name + " WITH(NOLOCK) where 1 = 1 ";
+
+                if (strSql != null && strSql.Trim().Length > 0)
+                {
+                    if (strSql.Trim().ToLower().Substring(0, 6) == "select")
+                    {
+                        execSql = strSql;
+                    }
+                    else
+                    {
+                        execSql += " and " + strSql;
+                    }
+
+                }
+
+                return GlobalObject.DatabaseServer.QueryInfo(execSql);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 获取相应实体类型的实体对象
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="keyValue">实体的唯一编码(主键)</param>
+        /// <returns>返回实体对象</returns>
+        public static T GetItem<T>(string keyValue)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetItem<T>(ctx, keyValue);
+            }
+        }
+
+        /// <summary>
+        /// 获取相应实体类型的实体对象
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">实体的唯一编码(主键)</param>
+        /// <returns>返回实体对象</returns>
+        public static T GetItem<T>(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null || keyValue.Trim().Length == 0)
+                {
+                    return default(T);
+                }
+
+
+                string execSql = "select * from " + typeof(T).Name + " WITH(NOLOCK) where F_Id = '" + keyValue + "' ";
+                IEnumerable<T> iEable = ctx.ExecuteQuery<T>(execSql);
+
+                if (iEable == null)
+                {
+                    return default(T);
+                }
+
+                List<T> lstEntity = iEable.ToList<T>();
+
+                if (lstEntity == null || lstEntity.Count() != 1)
+                {
+                    return default(T);
+                }
+
+                return (T)lstEntity.Single();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <returns>返回实体列表</returns>
+        public static List<T> GetList<T>()
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetList<T>(ctx, null);
+            }
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="model">相应实体类型的对象</param>
+        /// <returns>返回实体列表</returns>
+        public static List<T> GetList<T>(T model)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetList<T>(ctx, model);
+            }
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="strSql">SQL语句</param>
+        /// <returns>返回实体列表</returns>
+        public static List<T> GetList<T>(string strSql)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return GetList<T>(ctx, strSql);
+            }
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回实体列表</returns>
+        public static List<T> GetList<T>(<%=this.DataBaseName%>Context ctx)
+        {
+            return GetList<T>(ctx, null);
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model">相应实体类型的对象</param>
+        /// <returns>返回实体列表</returns>
+        public static List<T> GetList<T>(<%=this.DataBaseName%>Context ctx, T model)
+        {
+            if (model == null)
+            {
+                return null;
+            }
+
+            string execSql = "select * from " + typeof(T).Name + " WITH(NOLOCK) where 1 = 1 ";
+            List<string> lstProperty = GeneralFunction.GetItemPropertyName(model);
+
+            foreach (string property in lstProperty)
+            {
+                object value = GeneralFunction.GetItemValue<T>(model, property);
+
+                if (value != null)
+                {
+                    execSql += "and " + property + " = '" + value.ToString().Trim() + "' ";
+                }
+            }
+
+            return GetList<T>(ctx, execSql);
+        }
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="strSql">SQL语句</param>
+        /// <returns>返回实体列表</returns>
+        public static List<T> GetList<T>(<%=this.DataBaseName%>Context ctx, string strSql)
+        {
+            try
+            {
+                string execSql = @"select * from " + typeof(T).Name + " WITH(NOLOCK) where 1 = 1 ";
+
+                if (strSql != null && strSql.Trim().Length > 0)
+                {
+                    if (strSql.Trim().ToLower().Substring(0, 6) == "select")
+                    {
+                        execSql = strSql;
+                    }
+                    else
+                    {
+                        execSql += " and " + strSql;
+                    }
+
+                }
+
+                IEnumerable<T> iEable = ctx.ExecuteQuery<T>(execSql);
+                return iEable.ToList<T>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 判断数据库是否存在对应的实体
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="model">相应实体类型的对象</param>
+        /// <returns>存在则返回TRUE，否则返回FALSE</returns>
+        public static bool IsExist<T>(T model)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return IsExist<T>(ctx, model);
+            }
+        }
+
+        /// <summary>
+        /// 判断数据库是否存在对应的实体
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="keyValue">实体的唯一编码(主键)</param>
+        /// <returns>存在则返回TRUE，否则返回FALSE</returns>
+        public static bool IsExist<T>(string keyValue)
+        {
+            using (<%=this.DataBaseName%>Context ctx = DbContext.<%=this.DataBaseName%>DataContext)
+            {
+                return IsExist<T>(ctx, keyValue);
+            }
+        }
+
+        /// <summary>
+        /// 判断数据库是否存在对应的实体
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model">相应实体类型的对象</param>
+        /// <returns>存在则返回TRUE，否则返回FALSE</returns>
+        public static bool IsExist<T>(<%=this.DataBaseName%>Context ctx, T model)
+        {
+            try
+            {
+                List<T> lstT = GetList<T>(ctx, model);
+
+                if (lstT == null || lstT.Count() == 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 判断数据库是否存在对应的实体
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">实体的唯一编码(主键)</param>
+        /// <returns>存在则返回TRUE，否则返回FALSE</returns>
+        public static bool IsExist<T>(<%=this.DataBaseName%>Context ctx, string keyValue)
+        {
+            try
+            {
+                if (keyValue == null || keyValue.Trim().Length == 0)
+                {
+                    return false;
+                }
+
+                T result = GetItem<T>(ctx, keyValue);
+
+                if (result == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+}

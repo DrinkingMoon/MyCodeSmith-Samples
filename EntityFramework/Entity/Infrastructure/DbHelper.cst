@@ -1,0 +1,50 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System.Configuration;
+using System.Data;
+using System.Data.Common;
+using System.Data.SqlClient;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    public class DbHelper
+    {
+        private static string connstring = ConfigurationManager.ConnectionStrings["NFineDbContext"].ConnectionString;
+        public static int ExecuteSqlCommand(string cmdText)
+        {
+            using (DbConnection conn = new SqlConnection(connstring))
+            {
+                DbCommand cmd = new SqlCommand();
+                PrepareCommand(cmd, conn, null, CommandType.Text, cmdText, null);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+        private static void PrepareCommand(DbCommand cmd, DbConnection conn, DbTransaction isOpenTrans, CommandType cmdType, string cmdText, DbParameter[] cmdParms)
+        {
+            if (conn.State != ConnectionState.Open)
+                conn.Open();
+            cmd.Connection = conn;
+            cmd.CommandText = cmdText;
+            if (isOpenTrans != null)
+                cmd.Transaction = isOpenTrans;
+            cmd.CommandType = cmdType;
+            if (cmdParms != null)
+            {
+                cmd.Parameters.AddRange(cmdParms);
+            }
+        }
+    }
+}

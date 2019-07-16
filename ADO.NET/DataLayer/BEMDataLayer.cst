@@ -1,0 +1,476 @@
+﻿<%-- 
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Assembly Name="System.Data"%>
+<%@ Import Namespace="SchemaExplorer"%>
+<%@ Import Namespace="System.Data"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" Optional="False"  Category="公共参数" Description="数据表"%>
+<%@ Property Name="ProcedurePrefix" Type="System.String" Optional="True" Category="公共参数" Description="存储过程前缀名"%>
+<%@ Property Name="Expressname" Type="System.String" Optional="False" Category="自身参数" Description="项目名称"%>
+<%@ Property Name="DataLayerName" Type="System.String" Optional="False" Category="自身参数" Description="BEM名称"%>
+<%@ Property Name="DataEntityName" Type="System.String" Optional="False" Category="自身参数" Description="实体集名称"%>
+<%@ Property Name="DBUtilityName" Type="System.String" Optional="False" Category="自身参数" Description="数据层组件名称"%>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using System.Diagnostics;
+using <%=this.DataEntityName%>;
+using <%=this.DBUtilityName%>;
+
+namespace <%=this.DataLayerName%>
+{
+    /// <summary>
+    /// <%= TargetTable.Description %>数据访问类
+    /// </summary>
+    public class <%= TargetTable.Name %>:DataLayer,IDataLayer
+    {
+		/// <summary>
+		/// 插入一条数据
+		/// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <param name="item">要保存的数据信息</param>
+        /// <param name="error">错误信息</param>
+        /// <returns>成功返回True，失败返回False</returns>
+		public new bool Insert<T>(T item, out string error)
+		{
+            error = null;
+            
+            try
+            {
+                if(item == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+                
+                Debug.Assert(typeof(T) == typeof(<%=this.DataEntityName%>.<%= TargetTable.Name %>));
+                <%=this.DataEntityName%>.<%= TargetTable.Name %> model = new <%=this.DataEntityName%>.<%= TargetTable.Name %>();
+                
+                model = item as <%=this.DataEntityName%>.<%= TargetTable.Name %>;
+                
+                Hashtable parameters = new Hashtable();
+                <% for(int a = 0 ;a <TargetTable.Columns.Count;a++){%>
+                parameters.Add("@<%=TargetTable.Columns[a].Name %>", model.<%=TargetTable.Columns[a].Name %>);
+                <%} %>
+
+                DataBuilder.GetDBOperate("<%=this.Expressname %>").RunProcedure("<%=GetInsertProcedureName()%>", parameters);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+		}
+        
+        /// <summary>
+		/// 向事务中添加插入存储过程
+		/// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <param name="items">实体列表</param>
+        /// <param name="accessParameter">数据层参数对象</param>
+        /// <param name="error">错误信息</param>
+        /// <returns>成功返回True，失败返回False</returns>
+		public new bool Insert<T>(List<T> items, AccessParameter accessParameter, out string error)
+		{
+            error = null;
+            
+            try
+            {
+                if(items == null || accessParameter == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+                
+                Debug.Assert(typeof(T) == typeof(<%=this.DataEntityName%>.<%= TargetTable.Name %>));
+                <%=this.DataEntityName%>.<%= TargetTable.Name %> model = new <%=this.DataEntityName%>.<%= TargetTable.Name %>();
+                
+                foreach (T item in items)
+                {
+                    model = item as <%=this.DataEntityName%>.<%= TargetTable.Name %>;
+                    
+                    Hashtable parameters = new Hashtable();
+                    <% for(int a = 0 ;a <TargetTable.Columns.Count;a++){%>
+                    parameters.Add("@<%=TargetTable.Columns[a].Name %>", model.<%=TargetTable.Columns[a].Name %>);
+                    <%} %>
+                    
+                    accessParameter.StoredProcedures.Add("<%=GetInsertProcedureName()%>");
+                    accessParameter.StoredParams.Add(parameters);
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+		}
+		
+		/// <summary>
+		/// 更新一条数据
+		/// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <param name="item">要保存的数据信息</param>
+        /// <param name="error">错误信息</param>
+        /// <returns>成功返回True，失败返回False</returns>
+		public new bool Modify<T>(T item, out string error)
+		{
+            error = null;
+            
+            try
+            {
+                if(item == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+        
+                Debug.Assert(typeof(T) == typeof(<%=this.DataEntityName%>.<%= TargetTable.Name %>));
+    			<%=this.DataEntityName%>.<%= TargetTable.Name %> model = new <%=this.DataEntityName%>.<%= TargetTable.Name %>();
+
+                model = item as <%=this.DataEntityName%>.<%= TargetTable.Name %>;
+                
+                Hashtable parameters = new Hashtable();
+                <% for(int a = 0 ;a <TargetTable.PrimaryKey.MemberColumns.Count;a++) {%>  
+                parameters.Add("@<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>", model.<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>);
+                <%}%>
+                <%for(int a=0;a<TargetTable.Columns.Count;a++){%>
+                <%if(!TargetTable.Columns[a].IsPrimaryKeyMember){ %>
+                parameters.Add("@<%=TargetTable.Columns[a].Name %>", model.<%=TargetTable.Columns[a].Name %>);
+                <%} %>
+                <%}%>
+                
+                DataBuilder.GetDBOperate("<%=this.Expressname %>").RunProcedure("<%=GetUpdateProcedureName()%>", parameters);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+		}
+        
+        /// <summary>
+		/// 向事务中添加更新存储过程
+		/// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <param name="items">实体列表</param>
+        /// <param name="accessParameter">数据层参数对象</param>
+        /// <param name="error">错误信息</param>
+        /// <returns>成功返回True，失败返回False</returns>
+		public new bool Modify<T>(List<T> items, AccessParameter accessParameter, out string error)
+		{
+            error = null;
+            
+            try
+            {
+                if(items == null || accessParameter == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+                
+                Debug.Assert(typeof(T) == typeof(<%=this.DataEntityName%>.<%= TargetTable.Name %>));
+    			<%=this.DataEntityName%>.<%= TargetTable.Name %> model = new <%=this.DataEntityName%>.<%= TargetTable.Name %>();
+                
+                foreach (T item in items)
+                {
+                    model = item as <%=this.DataEntityName%>.<%= TargetTable.Name %>;
+                
+                    Hashtable parameters = new Hashtable();
+                    <% for(int a = 0 ;a <TargetTable.PrimaryKey.MemberColumns.Count;a++) {%>  
+                    parameters.Add("@<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>", model.<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>);
+                    <%}%>
+                    <%for(int a=0;a<TargetTable.Columns.Count;a++){%>
+                    <%if(!TargetTable.Columns[a].IsPrimaryKeyMember){ %>
+                    parameters.Add("@<%=TargetTable.Columns[a].Name %>", model.<%=TargetTable.Columns[a].Name %>);
+                    <%}%>
+                    <%}%>
+                
+                    accessParameter.StoredProcedures.Add("<%=GetUpdateProcedureName()%>");
+                    accessParameter.StoredParams.Add(parameters);
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+		}
+		
+		/// <summary>
+		/// 删除一条数据
+		/// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <param name="item">要删除的数据信息</param>
+        /// <param name="error">错误信息</param>
+        /// <returns>成功返回True，失败返回False</returns>
+		public new bool Delete<T>(T item, out string error)
+		{
+            error = null;
+            
+            try
+            {
+                if(item == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+                
+                Debug.Assert(typeof(T) == typeof(<%=this.DataEntityName%>.<%= TargetTable.Name %>));
+    			<%=this.DataEntityName%>.<%= TargetTable.Name %> model = new <%=this.DataEntityName%>.<%= TargetTable.Name %>();
+                
+                model = item as <%=this.DataEntityName%>.<%= TargetTable.Name %>;
+                
+                Hashtable parameters = new Hashtable();
+                <% for(int a = 0 ;a <TargetTable.PrimaryKey.MemberColumns.Count;a++) {%>  
+                parameters.Add("@<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>", model.<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>);
+                <%}%>
+                
+                DataBuilder.GetDBOperate("<%=this.Expressname %>").RunProcedure("<%=GetDeleteProcedureName()%>", parameters);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+		}
+		
+        /// <summary>
+		/// 向事务中添加删除存储过程
+		/// </summary>
+        /// <typeparam name="T">操作数据的类型</typeparam>
+        /// <param name="items">实体列表</param>
+        /// <param name="accessParameter">数据层参数对象</param>
+        /// <param name="error">错误信息</param>
+        /// <returns>成功返回True，失败返回False</returns>
+		public new bool Delete<T>(List<T> items, AccessParameter accessParameter, out string error)
+		{
+            error = null;
+            
+            try
+            {
+                if(items == null || accessParameter == null)
+                {
+                    throw new Exception("操作失败： 数据库操作信息为空");
+                }
+            
+                Debug.Assert(typeof(T) == typeof(<%=this.DataEntityName%>.<%= TargetTable.Name %>));
+    			<%=this.DataEntityName%>.<%= TargetTable.Name %> model = new <%=this.DataEntityName%>.<%= TargetTable.Name %>();
+                
+                foreach (T item in items)
+                {
+                    model = item as <%=this.DataEntityName%>.<%= TargetTable.Name %>;
+                    
+                    Hashtable parameters = new Hashtable();
+                    <% for(int a = 0 ;a <TargetTable.PrimaryKey.MemberColumns.Count;a++) {%>  
+                    parameters.Add("@<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>", model.<%=TargetTable.PrimaryKey.MemberColumns[a].Name %>);
+                    <%}%>
+                    
+                    accessParameter.StoredProcedures.Add("<%=GetDeleteProcedureName()%>");
+                    accessParameter.StoredParams.Add(parameters);
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+		}
+        
+		<%--/// <summary>
+		/// 获得数据列表
+		/// </summary>
+        /// <typeparam name="T">要获取数据的类型</typeparam>
+        /// <param name="strWhere">查询条件</param>
+        /// <param name="strOrderBy">排序</param>
+        /// <returns>成功则返回获取到的数据记录，失败则抛出异常</returns>
+		public override DataSet GetItemsDataSet<T>(string strWhere,string strOrderBy)
+		{
+            StringBuilder strSql = new StringBuilder();
+
+            strSql.Append("select ");
+            <% for(int a = 0;a<TargetTable.Columns.Count;a++) { %>
+            strSql.Append("<%=TargetTable.Columns[a].Name %><%if(a < this.TargetTable.Columns.Count - 1){%>,<%} %>");
+            <%} %>
+            strSql.Append(" FROM <%=this.TargetTable.FullName%> ");
+            
+            if (strWhere.Trim() != "")
+            {
+                strSql.Append(" where " + strWhere);
+            }
+
+            if (strOrderBy.Trim() != "")
+            {
+                strSql.Append(" order by " + strOrderBy);
+            }
+
+            return DataBuilder.GetDBOperate("<%=Expressname%>").ExcuteQuery(strSql.ToString());
+		} --%>
+		
+<%--		/// <summary>
+		/// 得到一个对象实体
+		/// </summary>
+        /// <typeparam name="T">要获取数据的类型</typeparam>
+        /// <param name="parameters">哈希表</param>
+        /// <returns>成功则返回获取到的数据记录，失败则抛出异常</returns>
+		public new DataRow GetItemDataRow<T>(Hashtable parameters)
+		{
+            DataSet ds = DataBuilder.GetDBOperate("<%=this.Expressname %>").RunProcedure("<%=GetSelectProcedureName()%>", parameters);
+
+            if (ds == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ds.Tables[0].Rows[0];
+            }
+        }   --%>         
+	}	
+}
+
+
+<script runat="template">
+<!-- #include file="../Util/Utility.cs" --> 
+                    
+//将数据库类型转化为C#类型的函数
+public string DataTypeToCSharpType(System.Data.DbType dbType)
+{
+    switch (dbType)
+    {
+        case DbType.AnsiString:
+            return "string";
+        case DbType.AnsiStringFixedLength:
+            return "string";
+        case DbType.Binary:
+            return "byte[]";
+        case DbType.Boolean:
+            return "bool";
+        case DbType.Byte:
+            return "byte";
+        case DbType.Currency:
+            return "decimal";
+        case DbType.Date:
+            return "DateTime";
+        case DbType.DateTime:
+            return "DateTime";
+        case DbType.DateTime2:
+            return "DateTime";
+        case DbType.DateTimeOffset:
+            return "DateTime";
+        case DbType.Decimal:
+            return "decimal";
+        case DbType.Double:
+            return "double";
+        case DbType.Guid:
+            return "Guid";
+        case DbType.Int16:
+            return "short";
+        case DbType.Int32:
+            return "int";
+        case DbType.Int64:
+            return "long";
+        case DbType.Object:
+            return "object";
+        case DbType.SByte:
+            return "sbyte";
+        case DbType.Single:
+            return "float";
+        case DbType.String:
+            return "string";
+        case DbType.StringFixedLength:
+            return "string";
+        case DbType.Time:
+            return "DateTime";
+        case DbType.UInt16:
+            return "ushort";
+        case DbType.UInt32:
+            return "uint";
+        case DbType.UInt64:
+            return "ulong";
+        case DbType.VarNumeric:
+            return "decimal";
+        case DbType.Xml:
+            return "string";
+        default:
+            return "object";
+    }
+}
+
+//将DBType类型转化为SqlDbType类型
+public string DataTypeToSqlDbType(System.Data.DbType dbType)
+{
+    switch (dbType)
+    {
+        case DbType.AnsiString:
+            return "VarChar";
+        case DbType.AnsiStringFixedLength:
+            return "VarChar";
+        case DbType.Binary:
+            return "Binary";
+        case DbType.Boolean:
+            return "Bit";
+        case DbType.Byte:
+            return "Binary";
+        case DbType.Currency:
+            return "Decimal";
+        case DbType.Date:
+            return "DateTime";
+        case DbType.DateTime:
+            return "DateTime";
+        case DbType.DateTime2:
+            return "DateTime";
+        case DbType.DateTimeOffset:
+            return "DateTime";
+        case DbType.Decimal:
+            return "Decimal";
+        case DbType.Double:
+            return "Float";
+        case DbType.Guid:
+            return "UniqueIdentifier";
+        case DbType.Int16:
+            return "SmallInt";
+        case DbType.Int32:
+            return "Int";
+        case DbType.Int64:
+            return "BigInt";
+        case DbType.Object:
+            return "object";
+        case DbType.SByte:
+            return "Binary";
+        case DbType.Single:
+            return "Real";
+        case DbType.String:
+            return "VarChar";
+        case DbType.StringFixedLength:
+            return "VarChar";
+        case DbType.Time:
+            return "DateTime";
+        case DbType.UInt16:
+            return "SmallInt";
+        case DbType.UInt32:
+            return "Int";
+        case DbType.UInt64:
+            return "BigInt";
+        case DbType.VarNumeric:
+            return "Decimal";
+        case DbType.Xml:
+            return "Xml";
+        default:
+            return "object";
+    }
+}
+
+</script>

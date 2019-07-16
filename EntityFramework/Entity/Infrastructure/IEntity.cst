@@ -1,0 +1,56 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    public class IEntity<TEntity>
+    {
+        public void Create()
+        {
+            var entity = this as ICreationAudited;
+            entity.F_Id = Guid.NewGuid().ToString();
+            var LoginInfo = OperatorProvider.GetCurrent();
+            if (LoginInfo != null)
+            {
+                entity.F_CreatorUserId = LoginInfo.UserId;
+            }
+            entity.F_CreatorTime = DateTime.Now;
+        }
+        public void Modify(string keyValue)
+        {
+            var entity = this as IModificationAudited;
+            entity.F_Id = keyValue;
+            var LoginInfo = OperatorProvider.GetCurrent();
+            if (LoginInfo != null)
+            {
+                entity.F_LastModifyUserId = LoginInfo.UserId;
+            }
+            entity.F_LastModifyTime = DateTime.Now;
+        }
+        public void Remove()
+        {
+            var entity = this as IDeleteAudited;
+            var LoginInfo = OperatorProvider.GetCurrent();
+            if (LoginInfo != null)
+            {
+                entity.F_DeleteUserId = LoginInfo.UserId;
+            }
+            entity.F_DeleteTime = DateTime.Now;
+            entity.F_DeleteMark = true;
+        }
+    }
+}

@@ -1,0 +1,76 @@
+﻿
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库" Description="数据库名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Repository
+*********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using <%= this.NameSapce %>.Entity;
+
+namespace <%= this.NameSapce %>.Repository
+{
+    /// <summary>
+    /// 实体对象通用操作接口
+    /// </summary>
+    interface IRepositoryBase
+    {
+        /// <summary>
+        /// 删除信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">对象唯一编码(主键)</param>
+        void Delete(<%=this.DataBaseName%>Context ctx, string keyValue);
+
+        /// <summary>
+        /// 添加信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model">实体对象</param>
+        void Insert(<%=this.DataBaseName%>Context ctx, object model);
+        
+        /// <summary>
+        /// 修改信息
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="model">实体对象</param>
+        void Modify(<%=this.DataBaseName%>Context ctx, object model);
+
+        /// <summary>
+        /// 获取实体集
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回object对象</returns>
+        object GetList(<%=this.DataBaseName%>Context ctx);
+
+        /// <summary>
+        /// 获取实体对象
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">对象唯一编码(主键)</param>
+        /// <returns>返回object对象</returns>
+        object GetItem(<%=this.DataBaseName%>Context ctx, string keyValue);
+
+        /// <summary>
+        /// 获取实体视图集
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <returns>返回object对象</returns>
+        object GetList_View(<%=this.DataBaseName%>Context ctx);
+
+        /// <summary>
+        /// 获取实体视图集
+        /// </summary>
+        /// <param name="ctx">数据上下文</param>
+        /// <param name="keyValue">对象唯一编码(主键)</param>
+        /// <returns>返回object对象</returns>
+        object GetItem_View(<%=this.DataBaseName%>Context ctx, string keyValue);
+    }
+}

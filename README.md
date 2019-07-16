@@ -1,1 +1,1 @@
-# MyCodeSmith-Samples
+# CodeSmith

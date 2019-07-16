@@ -1,0 +1,38 @@
+﻿
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Repository
+*********************************************************************************/
+using System;
+using System.Linq;
+using System.Text;
+using System.Data;
+using System.Collections.Generic;
+
+namespace <%=this.NameSapce%>.Repository
+{
+    /// <summary>
+	/// <%=this.TargetTable.Name%>实体的Repository接口 <%= TargetTable.Description %>
+	/// </summary>
+    public interface I<%=this.TargetTable.Name%>Rep
+    {
+        
+    }
+}
+
+
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

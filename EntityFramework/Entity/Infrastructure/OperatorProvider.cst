@@ -1,0 +1,155 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Configuration;
+using System.Web;
+using System.Security.Cryptography;
+using Newtonsoft.Json;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    static class OperatorProvider
+    {
+        public static OperatorModel GetCurrent()
+        {
+            OperatorModel operatorModel = new OperatorModel();
+
+            string LoginProvider = ConfigurationManager.AppSettings["LoginProvider"].ToString().Trim();
+            string LoginUserKey = "loginuserkey";
+
+            if (LoginProvider == "Cookie")
+            {
+                operatorModel = Decrypt(GetCookie(LoginUserKey).ToString()).ToObject<OperatorModel>();
+            }
+            else
+            {
+                operatorModel = Decrypt(GetSession(LoginUserKey).ToString()).ToObject<OperatorModel>();
+            }
+            return operatorModel;
+        }
+
+        /// <summary>
+        /// 读cookie值
+        /// </summary>
+        /// <param name="strName">名称</param>
+        /// <returns>cookie值</returns>
+        public static string GetCookie(string strName)
+        {
+            if (HttpContext.Current.Request.Cookies != null && HttpContext.Current.Request.Cookies[strName] != null)
+            {
+                return HttpContext.Current.Request.Cookies[strName].Value.ToString();
+            }
+            return "";
+        }
+        /// <summary>
+        /// 是否为空
+        /// </summary>
+        /// <param name="value">值</param>
+        public static bool IsEmpty(this string value)
+        {
+            return string.IsNullOrWhiteSpace(value);
+        }
+
+        /// <summary>
+        /// 读取Session的值
+        /// </summary>
+        /// <param name="key">Session的键名</param>        
+        public static string GetSession(string key)
+        {
+            if (key.IsEmpty())
+                return string.Empty;
+            return HttpContext.Current.Session[key] as string;
+        }
+        public static T ToObject<T>(this string Json)
+        {
+            return Json == null ? default(T) : JsonConvert.DeserializeObject<T>(Json);
+        }
+
+        #region ========解密========
+        /// <summary>
+        /// 解密
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static string Decrypt(string Text)
+        {
+            if (!string.IsNullOrEmpty(Text))
+            {
+                return Decrypt(Text, "desencrypt");
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        /// <summary> 
+        /// 解密数据 
+        /// </summary> 
+        /// <param name="Text"></param> 
+        /// <param name="sKey"></param> 
+        /// <returns></returns> 
+        public static string Decrypt(string Text, string sKey)
+        {
+            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
+            int len;
+            len = Text.Length / 2;
+            byte[] inputByteArray = new byte[len];
+            int x, i;
+            for (x = 0; x < len; x++)
+            {
+                i = Convert.ToInt32(Text.Substring(x * 2, 2), 16);
+                inputByteArray[x] = (byte)i;
+            }
+            des.Key = ASCIIEncoding.ASCII.GetBytes(System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(sKey, "md5").Substring(0, 8));
+            des.IV = ASCIIEncoding.ASCII.GetBytes(System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(sKey, "md5").Substring(0, 8));
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            CryptoStream cs = new CryptoStream(ms, des.CreateDecryptor(), CryptoStreamMode.Write);
+            cs.Write(inputByteArray, 0, inputByteArray.Length);
+            cs.FlushFinalBlock();
+            return Encoding.Default.GetString(ms.ToArray());
+        }
+
+        #endregion
+    }
+    public class OperatorModel
+    {
+        public string UserId { get; set; }
+        public string UserCode { get; set; }
+        public string UserName { get; set; }
+        public string UserPwd { get; set; }
+        public string CompanyId { get; set; }
+        public string DepartmentId { get; set; }
+        public string RoleId { get; set; }
+        public string LoginIPAddress { get; set; }
+        public string LoginIPAddressName { get; set; }
+        public string LoginToken { get; set; }
+        public DateTime LoginTime { get; set; }
+        public bool IsSystem { get; set; }
+    }
+}
+
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

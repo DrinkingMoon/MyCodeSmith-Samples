@@ -1,0 +1,162 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." 
+Debug="True" ResponseEncoding="UTF-8"%>
+
+<%-- 注册实体层Entity模板 --%>
+<%@ Register Name="EntityTable" Template=".\EntityTable.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="MappingTable" Template=".\MappingTable.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%@ Register Name="DbContext" Template=".\DbContext.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%@ Register Name="OperatorProvider" Template=".\Infrastructure\OperatorProvider.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="Pagination" Template=".\Infrastructure\Pagination.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="DbHelper" Template=".\Infrastructure\DbHelper.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="EntityInterfaceExtensions" Template=".\Infrastructure\EntityInterfaceExtensions.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="ICreationAudited" Template=".\Infrastructure\ICreationAudited.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IDeleteAudited" Template=".\Infrastructure\IDeleteAudited.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IEntity" Template=".\Infrastructure\IEntity.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IModificationAudited" Template=".\Infrastructure\IModificationAudited.cst" MergeProperties="False" ExcludeProperties=""%>
+
+
+<%@ Register Name="IRepositoryBase" Template=".\Repository\IRepositoryBase.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IRepositoryBaseT" Template=".\Repository\IRepositoryBase.T.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="RepositoryBase" Template=".\Repository\RepositoryBase.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="RepositoryBaseT" Template=".\Repository\RepositoryBase.T.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%-- 参数 --%>
+<%@ Property Name="TDB" Type="SchemaExplorer.TableSchemaCollection" Optional="False" Category="数据库" Description="选择表"%>
+<%@ Property Name="NameSapce" Type="System.String" Default="" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="OutPut" Type="System.String" Optional="False" Category="输出路径" Description="外部传入的输出路径参数"%>
+
+<%
+
+    this.OutputCSFile(this.TDB[0].Database.Name);
+    foreach(TableSchema table in this.TDB)
+    {
+        this.OutputEntity_Table(table);
+        this.OutputMapping_Table(table);
+    }
+%>
+
+
+<script runat="template">
+// My methods here.
+private void OutputEntity_Table(TableSchema SourceTable)
+{
+	EntityTable bem = new EntityTable();
+    
+    string FileDirectory = OutPut.Trim().Length == 0 ? OutputDirectory : OutPut + "\\Entity\\Models\\"+ SourceTable.Name +".cs";
+	bem.TargetTable = SourceTable;
+    bem.NameSapce = this.NameSapce;
+	bem.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+private void OutputMapping_Table(TableSchema SourceTable)
+{
+	MappingTable bem = new MappingTable();
+    
+    string FileDirectory = OutPut.Trim().Length == 0 ? OutputDirectory : OutPut + "\\Entity\\Models\\Mapping\\"+ SourceTable.Name +"Map.cs";
+	bem.TargetTable = SourceTable;
+    bem.NameSapce = this.NameSapce;
+	bem.RenderToFile(FileDirectory,true);
+	Debug.WriteLine(FileDirectory +" 创建成功.");
+}
+
+private void OutputCSFile(string DbName)
+{
+    
+    Pagination cs0 = new Pagination();
+    cs0.NameSapce = this.NameSapce;
+    cs0.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\Pagination.cs",true);
+    
+    DbHelper cs1 = new DbHelper();
+    cs1.NameSapce = this.NameSapce;
+    cs1.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\DbHelper.cs",true);
+    
+    EntityInterfaceExtensions cs2 = new EntityInterfaceExtensions();
+    cs2.NameSapce = this.NameSapce;
+    cs2.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\EntityInterfaceExtensions.cs",true);
+    
+    ICreationAudited cs3 = new ICreationAudited();
+    cs3.NameSapce = this.NameSapce;
+    cs3.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\ICreationAudited.cs",true);
+    
+    IDeleteAudited cs4 = new IDeleteAudited();
+    cs4.NameSapce = this.NameSapce;
+    cs4.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\IDeleteAudited.cs",true);
+    
+    IEntity cs5 = new IEntity();
+    cs5.NameSapce = this.NameSapce;
+    cs5.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\IEntity.cs",true);
+    
+    IDeleteAudited cs6 = new IDeleteAudited();
+    cs6.NameSapce = this.NameSapce;
+    cs6.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\IDeleteAudited.cs",true);
+    
+    IModificationAudited cs7 = new IModificationAudited();
+    cs7.NameSapce = this.NameSapce;
+    cs7.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\IModificationAudited.cs",true);
+    
+    
+    
+    IRepositoryBase cs8 = new IRepositoryBase();
+    cs8.NameSapce = this.NameSapce;
+    cs8.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Repository\\IRepositoryBase.cs",true);
+    
+    IRepositoryBaseT cs9 = new IRepositoryBaseT();
+    cs9.NameSapce = this.NameSapce;
+    cs9.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Repository\\IRepositoryBase.T.cs",true);
+    
+    RepositoryBase cs10 = new RepositoryBase();
+    cs10.NameSapce = this.NameSapce;
+    cs10.DataBaseName = DbName;
+    cs10.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Repository\\RepositoryBase.cs",true);
+    
+    RepositoryBaseT cs11 = new RepositoryBaseT();
+    cs11.NameSapce = this.NameSapce;
+    cs11.DataBaseName = DbName;
+    cs11.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Repository\\RepositoryBase.T.cs",true);
+    
+    
+    
+    DbContext cs12 = new DbContext();
+    cs12.NameSapce = this.NameSapce;
+    cs12.DataBaseName = DbName;
+    cs12.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\"+ DbName +"Context.cs",true);
+    
+    OperatorProvider cs13 = new OperatorProvider();
+    cs13.NameSapce = this.NameSapce;
+    cs13.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\Infrastructure\\OperatorProvider.cs",true);
+	
+}
+</script>
+
+
+<script runat="template">
+//解决方案输出路径
+private string Directory = String.Empty;
+
+[Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(System.Drawing.Design.UITypeEditor))] 
+[Optional, NotChecked]
+[DefaultValue("")]
+
+public string OutputDirectory 
+{ 
+	get
+	{
+		return Directory;
+	}
+	set
+	{
+		if (value.EndsWith("\\")) value = value.Substring(0, value.Length -1);
+		Directory = value;
+	} 
+}
+</script>

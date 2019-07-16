@@ -1,0 +1,42 @@
+﻿
+<%-- 
+Name: MVC_Repository模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="Prefix" Type="System.String" Optional="True" Category="前缀名" Description="前缀名"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Repository
+*********************************************************************************/
+
+using <%=this.NameSapce%>.Entity.Models;
+using <%=this.NameSapce%>.Entity;
+
+namespace <%=this.NameSapce%>.Repository.<%=this.Prefix%>
+{
+    /// <summary>
+	/// <%= TargetTable.Description %>
+	/// </summary>
+    public class <%=this.TargetTable.Name%>Rep : RepositoryBase<<%=this.TargetTable.Name%>>, I<%=this.TargetTable.Name%>Rep
+    {
+    
+    }
+}
+
+
+<script runat="template">
+// My methods here.
+public string SampleMethod()
+{
+  return "Method output.";
+}
+</script>

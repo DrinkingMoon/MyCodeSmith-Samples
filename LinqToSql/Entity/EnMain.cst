@@ -1,0 +1,58 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." 
+Debug="True" ResponseEncoding="UTF-8"%>
+
+<%-- 注册实体层Entity模板 --%>
+<%@ Register Name="DbContext" Template=".\DbContext.cst" MergeProperties="False" ExcludeProperties=""%>
+<%@ Register Name="IRCommEntity" Template=".\IRCommEntity.cst" MergeProperties="False" ExcludeProperties=""%>
+
+<%-- 参数 --%>
+<%@ Property Name="DataBaseName" Type="System.String" Optional="False" Category="数据库名" Description="数据库名"%>
+<%@ Property Name="NameSapce" Type="System.String" Default="" Optional="False" Category="命名空间" Description="命名空间"%>
+<%@ Property Name="OutPut" Type="System.String" Optional="False" Category="输出路径" Description="外部传入的输出路径参数"%>
+
+<%
+
+    DbContext cs0 = new DbContext();
+    cs0.NameSapce = this.NameSapce;
+    cs0.DataBaseName = this.DataBaseName;
+    cs0.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\DbContext.cs",true);
+
+    IRCommEntity cs1 = new IRCommEntity();
+    cs1.NameSapce = this.NameSapce;
+    cs1.DataBaseName = this.DataBaseName;
+    cs1.RenderToFile(OutPut.Trim().Length == 0 ? OutputDirectory : OutPut +"\\Entity\\IRCommEntity.cs",true);
+%>
+
+
+<script runat="template">
+</script>
+
+
+<script runat="template">
+//解决方案输出路径
+private string Directory = String.Empty;
+
+[Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(System.Drawing.Design.UITypeEditor))] 
+[Optional, NotChecked]
+[DefaultValue("")]
+
+public string OutputDirectory 
+{ 
+	get
+	{
+		return Directory;
+	}
+	set
+	{
+		if (value.EndsWith("\\")) value = value.Substring(0, value.Length -1);
+		Directory = value;
+	} 
+}
+</script>

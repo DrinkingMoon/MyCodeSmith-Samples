@@ -1,0 +1,43 @@
+﻿
+
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Linq.Expressions;
+
+namespace <%= this.NameSapce %>.Entity
+{
+    public interface IRepositoryBase : IDisposable
+    {
+        IRepositoryBase BeginTrans();
+        int Commit();
+        int Insert<TEntity>(TEntity entity) where TEntity : class;
+        int Insert<TEntity>(List<TEntity> entitys) where TEntity : class;
+        int Update<TEntity>(TEntity entity) where TEntity : class;
+        int Delete<TEntity>(TEntity entity) where TEntity : class;
+        int Delete<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
+        TEntity FindEntity<TEntity>(object keyValue) where TEntity : class;
+        TEntity FindEntity<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
+        IQueryable<TEntity> IQueryable<TEntity>() where TEntity : class;
+        IQueryable<TEntity> IQueryable<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
+        List<TEntity> FindList<TEntity>(string strSql) where TEntity : class;
+        List<TEntity> FindList<TEntity>(string strSql, DbParameter[] dbParameter) where TEntity : class;
+        List<TEntity> FindList<TEntity>(Pagination pagination) where TEntity : class,new();
+        List<TEntity> FindList<TEntity>(Expression<Func<TEntity, bool>> predicate, Pagination pagination) where TEntity : class,new();
+    }
+}

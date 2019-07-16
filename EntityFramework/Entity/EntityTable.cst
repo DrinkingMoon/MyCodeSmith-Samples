@@ -1,0 +1,76 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Assembly Name="SchemaExplorer"%>
+<%@ Import Namespace="SchemaExplorer"%>
+
+<%@ Property Name="TargetTable" Type="TableSchema" DeepLoad="True" Optional="False" Category="数据表" Description="数据表"%>
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_Entity
+*********************************************************************************/
+
+using System;
+
+namespace <%= this.NameSapce %>.Entity.Models
+{
+    /// <summary>
+	/// <%= TargetTable.Description %>
+	/// </summary>
+    public class <%=this.TargetTable.Name%> : IEntity<<%=this.TargetTable.Name%>>, ICreationAudited, IDeleteAudited, IModificationAudited
+    {
+        <%foreach(ColumnSchema col in TargetTable.Columns){ %>
+        /// <summary>
+		/// <%= col.Description %>
+		/// </summary>
+        public <%= this.GetDbType(col.DataType) %><%if(col.SystemType.IsValueType){%>?<%}%> <%= col.Name %> { get; set; }
+        
+        <% } %>
+    }
+}
+
+
+<script runat="template">
+// My methods here.
+public string GetDbType(DbType type)
+{
+    switch(type)
+    {
+        case DbType.Int64:
+            return "Int64";
+        case DbType.Int16:
+            return "Int16";
+        case DbType.Int32:
+            return "int";
+        case DbType.Boolean:
+            return "bool";
+        case DbType.DateTime:
+            return "DateTime";
+        case DbType.Decimal:
+            return "decimal";
+        case DbType.Double:
+            return "double";
+        case DbType.Binary:
+            return "System.Byte[]";
+        case DbType.Currency:
+            return "Single";
+        case DbType.AnsiString:
+        case DbType.String:
+        case DbType.StringFixedLength:
+            return "string";
+        case DbType.Guid:
+            return "System.Guid";
+        case DbType.Object:
+            return "object";
+        default:
+            return "object";
+    }
+}
+</script>

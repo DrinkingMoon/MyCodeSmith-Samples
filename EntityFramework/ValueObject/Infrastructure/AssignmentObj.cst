@@ -1,0 +1,41 @@
+﻿
+<%-- 
+Name: MVC_Entity模板
+Author: 曹津彬
+Description: 便于以后进行创建MVC框架
+--%>
+<%@ CodeTemplate Inherits="CodeTemplate" Language="C#" TargetLanguage="Text" Description="NetTiers main template." Debug="True" ResponseEncoding="UTF-8"%>
+
+<%@ Property Name="NameSapce" Type="System.String" Optional="False" Category="命名空间" Description="命名空间"%>
+/*******************************************************************************
+ * Copyright © <%=DateTime.Now.Year%>  <%=this.NameSapce%>版权所有
+ * Author: JinBin Cao
+ * Description: 领域层_ValueObject
+*********************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace <%= this.NameSapce %>.ValueObject
+{
+    public static class AssignmentObj
+    {
+        public static <%= this.NameSapce %>.Entity.Pagination ConvertType_Fun_Pagination(<%= this.NameSapce %>.BaseFunctional.Pagination pag)
+        {
+            <%= this.NameSapce %>.Entity.Pagination result = new Entity.Pagination();
+
+            result.page = pag.page;
+            result.records = pag.records;
+            result.rows = pag.rows;
+            result.sidx = pag.sidx;
+            result.sord = pag.sord;
+            result.total = pag.total;
+
+            return result;
+        }
+    }
+}
+
